@@ -98,7 +98,7 @@ exports.reply = function *(next) {
                 media_id: data.media_id
             }
         } else if(content === '9') {
-            var data = yield wechatApi.uploadMaterial('video', __dirname+'/assets/1.mp4',
+            var data = yield wechatApi.uploadMaterial('video', __dirname+'/assets/2.mp4',
                 {type: 'video', description:'{"title": "really a nice place", "introduction":"Nevver think it so easy"}'});
             console.log(data);
             reply = {
@@ -107,6 +107,13 @@ exports.reply = function *(next) {
                 description: "打个篮球玩玩",
                 media_id: data.media_id
             }
+        }
+        //获取素材总数
+        else if(content === '10') {
+            var data = yield wechatApi.count();
+            console.log(data);
+            reply = "voice_count:" + data.voice_count + '\n,video_count:'+data.video_count
+                    +'\nimage_count:'+data.image_count + 'news_count:' + data.news_count;
         }
         this.body = reply;
     }

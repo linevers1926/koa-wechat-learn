@@ -117,9 +117,9 @@ Wechat.prototype.fetch = function(mediaId, type, permanent) {
 
     return new Promise(function(resolve, reject){
         that.fetchAccessToken().then(function(data){
-            fetchUrl = fetchUrl.replace('ACCESS_TOKEN', data.access_token).replace('MEDIA_ID', mediaId);
+            var url = fetchUrl.replace('ACCESS_TOKEN', data.access_token).replace('MEDIA_ID', mediaId);
             if (!permanent && type === 'video') {
-                fetchUrl = fetchUrl.replace('https', 'http');
+                url = url.replace('https', 'http');
             }
             resolve(url);
         })
@@ -157,8 +157,22 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
             //下载临时视频
             if (!permanent && type==='video'){
                 url = url.replace('https','http');
+            } else {
+                form.access_token = data.access_token;
             }
-            request({method: "POST", url: url, json: true, body: form})
+
+            var ops = {
+                method: 'POST',
+                url: url,
+                json: true
+            }
+
+            if (type === 'news') {
+                ops.body = form;
+            } else {
+                ops.formData = form;
+            }
+            request(ops)
                 .then(function(response){
                     var _data = response.body;
                     if (_data) {
@@ -171,29 +185,15 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
     })
 }
 
-/*
-* @description:删除永久素材
- */
-Wechat.prototype.deleteMaterial = function(mediaId){
-    var form = {
-        media_id: mediaId
-    };
-    var that = this;
-    return new Promise(function(resolve, reject){
-        that.getAccessToken().then(function(data){
-            var deleteUrl = api.permanent.del.replace('ACCESS_TOKEN', data.access_token);
-            resolve(deleteUrl);
-        })
-    })
-}
+
 /*
 *@description:删除素材
  */
 Wechat.prototype.deleteMaterial = function(mediaId){
+    var that = this;
     var form = {
         media_id: mediaId
     };
-    var that = this;
     return new Promise(function(resolve, reject){
         that.getAccessToken().then(function(data){
             var deleteUrl = api.permanent.del.replace('ACCESS_TOKEN', data.access_token);
@@ -210,18 +210,19 @@ Wechat.prototype.deleteMaterial = function(mediaId){
     })
 }
 
+
 /*
- *@description:更新素材
+* @description：更新素材(只针对永久素材)
  */
-Wechat.prototype.deleteMaterial = function(mediaId, news){
+Wechat.prototype.updateMaterial = function(mediaId, news){
+    var that = this;
     var form = {
         media_id: mediaId
-    };
-    _.extend(form, news);
-    var that = this;
+    }
+    _.extend(form, news)
     return new Promise(function(resolve, reject){
         that.getAccessToken().then(function(data){
-            var url = api.permanent.del.replace('ACCESS_TOKEN', data.access_token);
+            var url = api.permanent.update.replace('ACCESS_TOKEN', data.access_token);
             request({method: "POST", url: url, json: true, body: form})
                 .then(function(response){
                     var _data = response.body;
@@ -235,27 +236,24 @@ Wechat.prototype.deleteMaterial = function(mediaId, news){
     })
 }
 
+
 /*
  *@description:获取素材数目
  */
-Wechat.prototype.deleteMaterial = function(){
-    var form = {
-        media_id: mediaId
-    };
-    _.extend(form, news);
+Wechat.prototype.count = function(){
     var that = this;
     return new Promise(function(resolve, reject){
         that.getAccessToken().then(function(data){
-            var url = api.permanent.del.replace('ACCESS_TOKEN', data.access_token);
+            var url = api.permanent.count.replace('ACCESS_TOKEN', data.access_token);
             request({method: "GET", url: url, json: true})
-                .then(function(response){
-                    var _data = response.body;
-                    if (_data) {
-                        resolve(_data);
-                    } else {
-                        throw new Error("Delete material fails");
-                    }
-                })
+            .then(function(response){
+                var _data = response.body;
+                if (_data) {
+                    resolve(_data);
+                } else {
+                    throw new Error("Delete material fails");
+                }
+            })
         })
     })
 }
@@ -270,7 +268,7 @@ Wechat.prototype.batchMaterial = function(options){
     options.count = options.count || 1;
     return new Promise(function(resolve, reject){
         that.getAccessToken().then(function(data){
-            var url = api.permanent.del.replace('ACCESS_TOKEN', data.access_token);
+            var url = api.permanent.batch.replace('ACCESS_TOKEN', data.access_token);
             request({method: "POST", url: url, json: true, body: options})
                 .then(function(response){
                     var _data = response.body;
