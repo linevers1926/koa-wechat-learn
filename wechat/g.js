@@ -12,7 +12,6 @@ module.exports = function(ops, hander) {
     var wechat = new Wechat(ops);
     return function *(next) {
         var that = this;
-        console.log(this.method)
 
         var token = ops.token;
         var signature = this.query.signature;
@@ -40,7 +39,6 @@ module.exports = function(ops, hander) {
             })
             var content = yield util.parseXMLAsync(data);
             var message = util.formatMessage(content.xml);
-            console.log(message);
 
             this.weixin = message;
             //@description:控制权转移

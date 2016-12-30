@@ -2,14 +2,13 @@
  * Created by Administrator on 2016/12/17.'*/
  'use strict'
 var Koa = require('koa');
-var wechat = require('./wechat/g')
+var g = require('./wechat/g')
 var path = require('path')
-var wechat_file = path.join(__dirname, './config/wechat.txt');
 var config = require('./config')
-var weixin = require('./weixin')
-//ÊµÀý»¯koa
+var reply = require('./wx/reply')
+//Êµï¿½ï¿½ï¿½ï¿½koa
 var app = new Koa()
-app.use(wechat(config.wechat, weixin.reply));
+//app.use(g(config.wechat, reply.reply));
 
 app.listen(3000);
 console.log("Listening: 3000")
