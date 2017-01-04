@@ -10,12 +10,12 @@ var menu = require('./menu')
 //初始化Wechat
 var wechatApi = new Wechat(config.wechat)
 
-wechatApi.deleteMenu()
-.then(function(data){
-    return wechatApi.createMenu(menu);
-}).then(function(msg){
-    console.log(msg);
-})
+//wechatApi.deleteMenu()
+//.then(function(data){
+//    return wechatApi.createMenu(menu);
+//}).then(function(msg){
+//    console.log(msg);
+//})
 
 exports.reply = function *(next) {
     var message = this.weixin;
@@ -59,7 +59,6 @@ exports.reply = function *(next) {
     else if(message.MsgType === 'text'){
         var content = message.Content;
         var reply = "额，你说的 " + message.content + ' 太复杂了';
-
         if (content === '1') {
             reply = '天下第一吃大米';
         } else if(content === '2') {
@@ -248,6 +247,23 @@ exports.reply = function *(next) {
             var data = wechatApi.createMenu(menu);
             console.log(data);
             reply = data.errmsg;
+        }
+        else if(content === '20') {
+            var semanticData = {
+                "query":"来点言情小说看看",
+                "city":"深圳",
+                "category": "novel",
+                "uid":message.FromUserName
+            }
+            var data = yield wechatApi.semantic(semanticData)
+            console.log(data);
+            reply = JSON.stringify(data).replace(/\"/g, '');
+        }
+        //长链接转短链接
+        else if(content.match(/(http[s]?|weixin)\:\/\//)) {
+            var data = yield wechatApi.long2short(content)
+            console.log(data);
+            reply = data.short_url;
         }
         this.body = reply;
     }
