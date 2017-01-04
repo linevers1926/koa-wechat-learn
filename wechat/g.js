@@ -20,7 +20,6 @@ module.exports = function(ops, hander) {
         var echostr = this.query.echostr;
         var str = [token, timestamp, nonce].sort().join('');
         var sha = sha1(str);
-
         if (this.method === 'GET') {
             if (sha != signature) {
                 this.body = "wrong";

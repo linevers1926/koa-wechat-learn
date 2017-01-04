@@ -35,7 +35,7 @@ exports.reply = function *(next) {
         }
         //地理位置
         else if (message.Event === 'LOCATION'){
-            this.body = "您上报的位置是"+message.Latitude+'/' + message.Longitude + '-' + message.Label;
+            this.body = "您上报的位置是"+message.Latitude+'/' + message.Longitude + (message.Label?('-'+message.Label):"");
         }
         //click事件
         else if(message.Event === 'CLICK') {
@@ -44,7 +44,11 @@ exports.reply = function *(next) {
         //扫描
         else if(message.Event === 'SCAN') {
             console.log("关注后扫二维码:"+message.EventKey+','+message.Ticket);
-            this.body = "看到你扫一下哦";
+            if (message.EventKey === '124') {
+                this.body = "欢迎关注linevers测试公众号~~~";
+            } else {
+                this.body = "看到你扫一下哦";
+            }
         }
         //链接
         else if(message.Event === 'VIEW') {
@@ -258,6 +262,35 @@ exports.reply = function *(next) {
             var data = yield wechatApi.semantic(semanticData)
             console.log(data);
             reply = JSON.stringify(data).replace(/\"/g, '');
+        }
+        else if(content === '21') {
+            //创建临时二维码
+            var qrcodeTempParams = {
+                "expire_seconds": 604800,
+                "action_name": "QR_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_id": 123
+                    }
+                }
+            }
+            var qrcodePermParams = {
+                "action_name": "QR_LIMIT_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_id": 124
+                    }
+                }
+            }
+            var ticketData = yield wechatApi.createQrcode(qrcodePermParams);
+            console.log(ticketData)
+            var qrcodeHref= yield wechatApi.showQrcode(ticketData.ticket);
+            reply = [{
+                title: "二维码图片",
+                description: "二维码图片地址",
+                picUrl: qrcodeHref,
+                url: qrcodeHref
+            }]
         }
         //长链接转短链接
         else if(content.match(/(http[s]?|weixin)\:\/\//)) {

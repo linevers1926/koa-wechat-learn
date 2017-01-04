@@ -2,7 +2,6 @@
  * Created by Administrator on 2016/12/18.
  */
 'use strict'
-var sha1 = require('sha1');
 var Promise = require('bluebird');
 var request = Promise.promisify(require('request')); //request promise��
 var util = require('./util')
@@ -55,7 +54,11 @@ var api = {
     },
     semantic: 'https://api.weixin.qq.com/semantic/semproxy/search?access_token=ACCESS_TOKEN',
     long2short: prefix + "shorturl?access_token=ACCESS_TOKEN",
-    ticket: prefix + "ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi"
+    ticket: prefix + "ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi",
+    qrcode: {
+        create: prefix + "qrcode/create?access_token=ACCESS_TOKEN",
+        show: "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET"
+    }
     //upload: prefix + 'media/upload?access_token=ACCESS_TOKEN&type=TYPE'
 }
 function Wechat(ops) {
@@ -762,6 +765,50 @@ Wechat.prototype.long2short = function(longUrl) {
                     reject(err)
                 })
         })
+    })
+}
+
+//生成二维码链接
+Wechat.prototype.createQrcode = function(qrcodeParams) {
+    var that = this;
+    return new Promise(function(resolve, reject){
+        that.fetchAccessToken().then(function(data){
+            var url = api.qrcode.create.replace('ACCESS_TOKEN', data.access_token)
+            request({method: 'POST', json: true, url: url, body: qrcodeParams})
+                .then(function(response){
+                    var _data = response.body;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('createQrcode Error');
+                    }
+                }).catch(function(err)
+                {
+                    reject(err)
+                })
+        })
+    })
+}
+
+//显示二维码
+Wechat.prototype.showQrcode = function(ticket) {
+    var that = this;
+    //var url = api.qrcode.show.replace('TICKET', ticket)
+    //return request.get(url).pipe(request.put('img.png'))
+    return new Promise(function(resolve, reject){
+        var url = api.qrcode.show.replace('TICKET', ticket)
+        request({method: 'GET', url: url})
+            .then(function(response){
+                var _data = response.request.href;
+                if (_data) {
+                    resolve(_data);
+                } else {
+                    throw new Error('showQrcode Error');
+                }
+            }).catch(function(err)
+            {
+                reject(err)
+            })
     })
 }
 

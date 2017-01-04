@@ -25,10 +25,12 @@ exports.tpl = function(content, message) {
     var toUsername = message.ToUserName;
 
     if (Array.isArray(content)) {
-        //ͼ����Ϣ
         type = 'news';
     }
     type = content?(content.type||type) : type;
+    if (type === 'file') {
+        return content.stream;
+    }
     info.content = content;
     info.createTime = new Date().getTime();
     info.toUserName = fromUsername;
