@@ -2,13 +2,13 @@
  * Created by Administrator on 2016/12/22.
  */
 'use strict'
-var config = require('./../config')
 var Wechat = require('./../wechat/wechat')
 var path = require('path')
 var menu = require('./menu')
 
 //初始化Wechat
-var wechatApi = new Wechat(config.wechat)
+var wx = require('../wx/index')
+var wechatApi = wx.getWechat();
 
 //wechatApi.deleteMenu()
 //.then(function(data){

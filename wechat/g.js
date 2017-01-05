@@ -12,7 +12,6 @@ module.exports = function(ops, hander) {
     var wechat = new Wechat(ops);
     return function *(next) {
         var that = this;
-
         var token = ops.token;
         var signature = this.query.signature;
         var nonce = this.query.nonce;
