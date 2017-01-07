@@ -5,17 +5,11 @@
 var Wechat = require('./../wechat/wechat')
 var path = require('path')
 var menu = require('./menu')
+var Movie = require('../app/api/movie')
 
 //初始化Wechat
 var wx = require('../wx/index')
 var wechatApi = wx.getWechat();
-
-//wechatApi.deleteMenu()
-//.then(function(data){
-//    return wechatApi.createMenu(menu);
-//}).then(function(msg){
-//    console.log(msg);
-//})
 
 exports.reply = function *(next) {
     var message = this.weixin;
@@ -26,7 +20,14 @@ exports.reply = function *(next) {
             if (message.EventKey) {
                 console.log("扫二维码进来:" + message.EventKey +' '+ message.ticket);
             }
-            this.body = '哈哈，你订阅了这个号\r\n';
+            this.body = '亲，欢迎关注linevers电影世界\n'
+                        + '回复1~3，测试文字回复\n'
+                        + '回复4，测试图文回复\n'
+                        + '回复 首页，进入电影首页\n'
+                        + '回复 登录，进入微信登录绑定\n'
+                        + '回复 游戏，进入游戏页面\n'
+                        + '回复 电影名称，查询电影信息\n'
+                        + '也可以点击 <a href="http://liuyiqing.iok.la/movie">语音查电影</a> ';
         }
         //取消订阅
         else if (message.Event === 'unsubscribe') {
@@ -58,6 +59,30 @@ exports.reply = function *(next) {
         else if(message.Event === 'scancode_push' || message.Event === 'scancode_waitmsg') {
             console.log(message.ScanCodeInfo);
             this.body = "扫码结果:"+ message.ScanCodeInfo.ScanResult || "";
+        }
+    }
+    //语音
+    else if (message.MsgType === 'voice') {
+        var voiceText = message.Recognition;
+        var movies = yield Movie.searchByName(voiceText)
+        if (!movies || movies.length === 0) {
+            movies = yield Movie.searchByDouban(voiceText);
+        }
+
+        if (movies && movies.length > 0) {
+            reply = [];
+            movies = movies.slice(0, 10);
+            movies.forEach(function(movie){
+                reply.push({
+                    title: movie.title,
+                    description: movie.title,
+                    picUrl: movie.images.large,
+                    url: movie.alt
+                })
+            })
+        }
+        else {
+            reply = '没有查询到与'+content + ' 匹配的电影，要不要换一个名字试试'
         }
     }
     else if(message.MsgType === 'text'){
@@ -178,11 +203,12 @@ exports.reply = function *(next) {
         else if (content === '18') {
             /*var message = {
                 content: 'okokoko'
+                oJZSCw1RavftrBwkXZ9arAURTuys
             }*/
             var message = {
                 media_id: 'Q-1eme9exgvPKzpFiM05TuPSp9ZDgK3aT5RI53z_Gt8'
             }
-            var data = yield wechatApi.sendByGroup('image', message, 'oJZSCw8fF51SOCTi_3TDdzXbL1uo');
+            var data = yield wechatApi.sendByGroup('image', message, 'oJZSCw1RavftrBwkXZ9arAURTuys');
             console.log(data);
             reply = data.errmsg;
         }
@@ -297,6 +323,28 @@ exports.reply = function *(next) {
             var data = yield wechatApi.long2short(content)
             console.log(data);
             reply = data.short_url;
+        }
+        else {
+            var movies = yield Movie.searchByName(content)
+            if (!movies || movies.length === 0) {
+                movies = yield Movie.searchByDouban(content);
+            }
+
+            if (movies && movies.length > 0) {
+                reply = [];
+                movies = movies.slice(0, 5);
+                movies.forEach(function(movie){
+                    reply.push({
+                        title: movie.title,
+                        description: movie.title,
+                        picUrl: movie.poster || movie.images.large,
+                        url: 'http://liuyiqing.iok.la/movie/'+movie.id
+                    })
+                })
+            }
+            else {
+                reply = '没有查询到与'+content + ' 匹配的电影，要不要换一个名字试试'
+            }
         }
         this.body = reply;
     }

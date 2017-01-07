@@ -5,9 +5,13 @@ var Koa = require('koa');
 var path = require('path')
 var fs = require('fs')
 var mongoose = require('mongoose')
+mongoose.Promise = require('bluebird');
 var app = new Koa()
 var convert = require('koa-convert')
-
+var views = require('koa-views')
+app.use(views(__dirname + '/app/views', {
+    extension: 'jade'
+}))
 
 //mongod
 var mongoose = require('mongoose')
@@ -80,7 +84,8 @@ wechatApi.deleteMenu()
 var Router = require('koa-router')
 var router = new Router();
 var game = require('./app/controllers/game')
-router.get('/movie', convert(game.movie));
+router.get('/movie', convert(game.guss));
+router.get('/movie/:id', convert(game.find));
 var wechat = require('./app/controllers/wechat')
 router.get('/wechat', convert(wechat.hear))
 router.post('/wechat', convert(wechat.hear))

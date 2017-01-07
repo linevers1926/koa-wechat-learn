@@ -17,9 +17,9 @@ var config = {
         encodingAESKey: 'lineversloveyinglineversloveyinglineverslov',
         //个人
         /*token: 'linevers',
-         APPID: 'wx2bb849b868e53e9e',  //wxb3080423ca727a96
-         appSecret: "747f3850f2d2bbbe3c2b828f0f7c339d",
-         encodingAESKey: 'lineversloveyinglineversloveyinglineverslov',*/
+        APPID: 'wx2bb849b868e53e9e',  //wxb3080423ca727a96
+        appSecret: "747f3850f2d2bbbe3c2b828f0f7c339d",
+        encodingAESKey: 'lineversloveyinglineversloveyinglineverslov',*/
         //企业
         /*token: 'linevers',
          APPID: 'wx4918ec79d40bd117',  //wxb3080423ca727a96

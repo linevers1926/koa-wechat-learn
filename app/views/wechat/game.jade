@@ -1,0 +1,102 @@
+extends ../wechat
+
+block content
+    h1 点击标题开始录音-
+    span#transResult
+    p#title
+    div#director
+    div#year
+    div#poster
+    script.
+        wx.config({
+            debug: false,
+            appId: '#{appId}',
+            timestamp: #{timestamp},
+            nonceStr: "#{noncestr}",
+            signature: "#{signature}",
+            jsApiList: ['startRecord',
+                'stopRecord',
+                'onVoiceRecordEnd',
+                'translateVoice',
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo',
+                'previewImage'
+            ]
+        })
+
+        function shareToFriend(shareContent) {
+            wx.onMenuShareAppMessage(shareContent);
+        }
+
+        var slides = null;
+
+        wx.ready(function(){
+            var isRecording = false
+            $('#poster').on('click', function(){
+                wx.previewImage(slides);
+            });
+
+            $('h1').on('click', function(){
+                if (!isRecording){
+                    isRecording = true;
+                        wx.startRecord({
+                        cancel: function(){alert("那就不能搜了")}
+                    })
+                    return
+                }
+                isRecording = false;
+                wx.stopRecord({
+                    success: function (res) {
+                        var localId = res.localId;
+                        wx.translateVoice({
+                            localId: localId,
+                            // 需要识别的音频的本地Id，由录音相关接口获得
+                            isShowProgressTips: 1,
+                            // 默认为1，显示进度提示
+                            success: function (res) {
+                                var translateResult = res.translateResult;
+                                // 语音识别的结果
+                                $('#transResult').html(translateResult);
+                                $.ajax({
+                                    url: "https://api.douban.com/v2/movie/search?q="+translateResult,
+                                    //+translateResult,
+                                    dataType: "jsonp",
+                                    type: "GET",
+                                    jsonpCallback: "callback",
+                                    success: function(data) {
+                                        var subject = data.subjects[0];
+                                        $('#director').html(subject.directors[0].name)
+                                        $('#poster').html("<img src='" + subject.images.large + "'/>")
+                                        $('#year').html(subject.year)
+                                        $('#title').html(subject.title)
+                                        shareContent = {
+                                            title: subject.title,
+                                            desc: "我搜出来了"+subject.title,
+                                            link: 'http://liuyiqing.iok.la/movie',
+                                            imgUrl: subject.images.small,
+                                            success: function () {
+                                                alert("分享成功")
+                                            },
+                                            cancel: function () {
+                                                alert("分享失败")
+                                            }
+                                        };
+                                        shareToFriend(shareContent)
+                                        slides = {
+                                            current: subject.images.large,
+                                            urls: []
+                                        }
+
+                                        data.subjects.forEach(function(item) {
+                                            slides.urls.push(item.images.large)
+                                        })
+                                    }
+                                })
+                            }
+                        });
+                    }
+                });
+            })
+        });
