@@ -11,6 +11,7 @@ var koa_request = require('koa-request')
 var Promise = require('bluebird')
 var request = Promise.promisify(require('request'))
 var _ = require('lodash')
+var co = require('co')
 
 // index page
 exports.findAll = function *() {
@@ -107,6 +108,10 @@ function* updateMovie(movie) {
             })
         })
         yield cateArray
+
+        //co(function *(){
+        //    yield cateArray;
+        //})
     }
     else {
         movie.save();

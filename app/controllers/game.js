@@ -19,13 +19,14 @@ exports.guss = function *(next) {
 
 exports.find = function *(next) {
     var id = this.params.id;
-    var wechatApi = wx.getWechat();
+    /*var wechatApi = wx.getWechat();
     var data = yield wechatApi.fetchAccessToken();
     var ticketData = yield wechatApi.fetchTicket(data.access_token);
     var ticket = ticketData.ticket;
     var url = this.href;
     var params = util.sign(ticket, url);
-    params.appId = wechatApi.appID;
+    params.appId = wechatApi.appID;*/
+    var params = {}
     var movie = yield Movie.searchById(id)
     params.movie = movie;
     yield this.render("wechat/movie", params)
